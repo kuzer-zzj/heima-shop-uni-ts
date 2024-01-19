@@ -1,7 +1,16 @@
 <script setup lang="ts">
 import { useMemberStore } from '@/stores'
+import { http } from '@/utils/http'
 
 const memberStore = useMemberStore()
+const getData = async () => {
+  console.log('点点点4')
+  const result = await http<String[]>({
+    method: 'GET',
+    url: '/member/profile',
+  })
+  console.log('请求结果：', result.result)
+}
 </script>
 
 <template>
@@ -20,6 +29,7 @@ const memberStore = useMemberStore()
       保存用户信息
     </button>
     <button @tap="memberStore.clearProfile()" size="mini" plain type="warn">清理用户信息</button>
+    <button @tap="getData" size="mini" plain type="warn">发起请求</button>
   </view>
 </template>
 
