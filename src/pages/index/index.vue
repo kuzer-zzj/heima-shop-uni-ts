@@ -6,6 +6,7 @@ import { ref } from 'vue'
 import type { BannerItem, CategoryItem, HotItem } from '@/types/home'
 import CategoryPanel from './components/CategoryPanel.vue'
 import HotPanel from './components/HotPanel.vue'
+import type { XtxGuessInstance } from '@/types/component'
 
 const list = ref<BannerItem[]>([])
 const getHomeBanner = async () => {
@@ -28,6 +29,14 @@ const gethomeHotList = async () => {
   homeHotList.value = res.result
 }
 
+const guessRef = ref<XtxGuessInstance>()
+
+const onScrolltolower = () => {
+  console.log('滚动到底部了')
+  guessRef.value.getMore()
+  console.log('滚动到底部了over')
+}
+
 onLoad(() => {
   getHomeBanner()
   getcateGoryList()
@@ -37,11 +46,11 @@ onLoad(() => {
 
 <template>
   <CustomNavbar></CustomNavbar>
-  <scroll-view scroll-y class="scroll-page">
+  <scroll-view @scrolltolower="onScrolltolower" scroll-y class="scroll-page">
     <XtxSwiper :list="list"></XtxSwiper>
     <CategoryPanel :list="cateGoryList"></CategoryPanel>
     <HotPanel :list="homeHotList"></HotPanel>
-    <XtxGuess></XtxGuess>
+    <XtxGuess ref="guessRef"></XtxGuess>
     <view class="index">index3</view>
   </scroll-view>
 </template>

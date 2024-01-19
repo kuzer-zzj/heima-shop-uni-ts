@@ -1,17 +1,39 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { getHomeGoodsGuessLikeAPI } from '@/services/home'
-import type { GuessItem } from '@/types/home'
+import type { GuessItem, PageParams } from '@/types/home'
 import { onMounted } from 'vue'
+
+const param: Required<PageParams> = {
+  page: 30,
+  /** 页大小：默认值为 10 */
+  pageSize: 10,
+}
+
+const finish = ref(false)
 
 const guessLike = ref<GuessItem[]>([])
 const getHomeGoodsGuessLike = async () => {
-  const res = await getHomeGoodsGuessLikeAPI()
-  guessLike.value = res.result.items
-  console.log('猜你喜欢：', res)
+  if (finish.value) {
+    uni.showToast({ title: '没有更多数据了', icon: 'none' })
+    return
+  }
+
+  const res = await getHomeGoodsGuessLikeAPI(param)
+  param.page++
+  if (param.page > res.result.pages) {
+    finish.value = true
+    return
+  }
+  guessLike.value.push(...res.result.items)
 }
 
 onMounted(() => getHomeGoodsGuessLike())
+
+//给父组件暴露方法
+defineExpose({
+  getMore: getHomeGoodsGuessLike,
+})
 </script>
 
 <template>
@@ -34,7 +56,7 @@ onMounted(() => getHomeGoodsGuessLike())
       </view>
     </navigator>
   </view>
-  <view class="loading-text"> 正在加载... </view>
+  <view class="loading-text"> {{ finish ? '没有更多数据了' : '加载中....' }} </view>
 </template>
 
 <style lang="scss">
