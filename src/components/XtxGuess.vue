@@ -5,7 +5,7 @@ import type { GuessItem, PageParams } from '@/types/home'
 import { onMounted } from 'vue'
 
 const param: Required<PageParams> = {
-  page: 30,
+  page: 1,
   /** 页大小：默认值为 10 */
   pageSize: 10,
 }
@@ -30,8 +30,15 @@ const getHomeGoodsGuessLike = async () => {
 
 onMounted(() => getHomeGoodsGuessLike())
 
+const resetParam = () => {
+  param.page = 1
+  finish.value = false
+  guessLike.value = []
+}
+
 //给父组件暴露方法
 defineExpose({
+  resetParam,
   getMore: getHomeGoodsGuessLike,
 })
 </script>

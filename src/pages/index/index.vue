@@ -42,11 +42,31 @@ onLoad(() => {
   getcateGoryList()
   gethomeHotList()
 })
+const isRefreshing = ref(false)
+const onRefresherrefresh = async () => {
+  console.log('下拉刷新')
+  isRefreshing.value = true
+  guessRef.value.resetParam()
+  await Promise.all([
+    getHomeBanner(),
+    getcateGoryList(),
+    gethomeHotList(),
+    guessRef.value.getMore(),
+  ])
+  isRefreshing.value = false
+}
 </script>
 
 <template>
   <CustomNavbar></CustomNavbar>
-  <scroll-view @scrolltolower="onScrolltolower" scroll-y class="scroll-page">
+  <scroll-view
+    refresher-enabled
+    @refresherrefresh="onRefresherrefresh"
+    @scrolltolower="onScrolltolower"
+    :refresher-triggered="isRefreshing"
+    scroll-y
+    class="scroll-page"
+  >
     <XtxSwiper :list="list"></XtxSwiper>
     <CategoryPanel :list="cateGoryList"></CategoryPanel>
     <HotPanel :list="homeHotList"></HotPanel>
