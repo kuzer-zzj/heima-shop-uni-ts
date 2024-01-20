@@ -7,6 +7,7 @@ import type { BannerItem, CategoryItem, HotItem } from '@/types/home'
 import CategoryPanel from './components/CategoryPanel.vue'
 import HotPanel from './components/HotPanel.vue'
 import type { XtxGuessInstance } from '@/types/component'
+import PageSkeleton from './components/PageSkeleton.vue'
 
 const list = ref<BannerItem[]>([])
 const getHomeBanner = async () => {
@@ -37,10 +38,12 @@ const onScrolltolower = () => {
   console.log('滚动到底部了over')
 }
 
-onLoad(() => {
-  getHomeBanner()
-  getcateGoryList()
-  gethomeHotList()
+const isLoading = ref(false)
+
+onLoad(async () => {
+  isLoading.value = true
+  await Promise.all([getHomeBanner(), getcateGoryList(), gethomeHotList()])
+  isLoading.value = false
 })
 const isRefreshing = ref(false)
 const onRefresherrefresh = async () => {
@@ -67,11 +70,14 @@ const onRefresherrefresh = async () => {
     scroll-y
     class="scroll-page"
   >
-    <XtxSwiper :list="list"></XtxSwiper>
-    <CategoryPanel :list="cateGoryList"></CategoryPanel>
-    <HotPanel :list="homeHotList"></HotPanel>
-    <XtxGuess ref="guessRef"></XtxGuess>
-    <view class="index">index3</view>
+    <PageSkeleton v-if="isLoading"></PageSkeleton>
+    <template v-else>
+      <XtxSwiper :list="list"></XtxSwiper>
+      <CategoryPanel :list="cateGoryList"></CategoryPanel>
+      <HotPanel :list="homeHotList"></HotPanel>
+      <XtxGuess ref="guessRef"></XtxGuess>
+      <view class="index">index3</view>
+    </template>
   </scroll-view>
 </template>
 
