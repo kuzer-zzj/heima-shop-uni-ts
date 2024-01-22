@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { getHomeBannerAPI, getHomeCategoryAPI, getHomeHotAPI } from '@/services/home'
 import type { BannerItem } from '@/types/home'
 import { onLoad } from '@dcloudio/uni-app'
@@ -25,6 +25,11 @@ const cateTap = (index: number) => {
   console.log('点击了：', index)
   activeIndex.value = index
 }
+
+//通过计算属性获取 categoryList 中的二级分类
+const subCategory = computed(() => {
+  return categoryList.value[activeIndex.value]?.children || []
+})
 
 onLoad(() => {
   getBanner()
@@ -59,27 +64,24 @@ onLoad(() => {
         <!-- 焦点图 -->
         <XtxSwiper class="banner" :list="bannerList" />
         <!-- 内容区域 -->
-        <view class="panel" v-for="item in 3" :key="item">
+        <view class="panel" v-for="item in subCategory" :key="item.id">
           <view class="title">
-            <text class="name">宠物用品</text>
+            <text class="name">{{ item.name }}</text>
             <navigator class="more" hover-class="none">全部</navigator>
           </view>
           <view class="section">
             <navigator
-              v-for="goods in 4"
-              :key="goods"
+              v-for="goods in item.goods"
+              :key="goods.id"
               class="goods"
               hover-class="none"
-              :url="`/pages/goods/goods?id=`"
+              :url="`/pages/goods/goods?id=${goods.id}`"
             >
-              <image
-                class="image"
-                src="https://yanxuan-item.nosdn.127.net/674ec7a88de58a026304983dd049ea69.jpg"
-              ></image>
-              <view class="name ellipsis">木天蓼逗猫棍</view>
+              <image class="image" :src="goods.picture"></image>
+              <view class="name ellipsis">{{ goods.name }}</view>
               <view class="price">
                 <text class="symbol">¥</text>
-                <text class="number">16.00</text>
+                <text class="number">{{ goods.price }}</text>
               </view>
             </navigator>
           </view>
