@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import { getHomeBannerAPI, getHomeCategoryAPI, getHomeHotAPI } from '@/services/home'
 import type { BannerItem } from '@/types/home'
 import { onLoad } from '@dcloudio/uni-app'
+import { getCategoryTopAPI } from '@/services/category'
+import type { CategoryTopItem } from '@/types/category'
 
 const bannerList = ref<BannerItem[]>([])
 const getBanner = async () => {
@@ -10,8 +12,23 @@ const getBanner = async () => {
   console.log('banner结果：', res.result)
   bannerList.value = res.result
 }
+
+const categoryList = ref<CategoryTopItem[]>([])
+const activeIndex = ref(0)
+const getCategory = async () => {
+  const res = await getCategoryTopAPI()
+  console.log('分类结果：', res.result)
+  categoryList.value = res.result
+}
+
+const cateTap = (index: number) => {
+  console.log('点击了：', index)
+  activeIndex.value = index
+}
+
 onLoad(() => {
   getBanner()
+  getCategory()
 })
 </script>
 
@@ -27,8 +44,14 @@ onLoad(() => {
     <view class="categories">
       <!-- 左侧：一级分类 -->
       <scroll-view class="primary" scroll-y>
-        <view v-for="(item, index) in 10" :key="item" class="item" :class="{ active: index === 0 }">
-          <text class="name"> 居家 </text>
+        <view
+          v-for="(item, index) in categoryList"
+          :key="item.id"
+          class="item"
+          :class="{ active: index === activeIndex }"
+          @tap="() => cateTap(index)"
+        >
+          <text class="name"> {{ item.name }} </text>
         </view>
       </scroll-view>
       <!-- 右侧：二级分类 -->
