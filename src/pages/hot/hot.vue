@@ -23,11 +23,15 @@ uni.setNavigationBarTitle({
 })
 
 const bannerImg = ref('')
-const subTypeItemList = ref<SubTypeItem[]>([])
+const subTypeItemList = ref<(SubTypeItem & { finish?: boolean })[]>([])
 const activeIndex = ref(0)
 const getHotRecommd = async () => {
   const url = currentHot!.url
-  const res = await getHotRecommdAPI(url)
+  const res = await getHotRecommdAPI(url, {
+    // 技巧：环境变量，开发环境，修改初始页面方便测试分页结束
+    page: import.meta.env.DEV ? 30 : 1,
+    pageSize: 10,
+  })
   console.log('热门推荐数据：', res)
   bannerImg.value = res.result.bannerPicture
   subTypeItemList.value = res.result.subTypes
@@ -36,6 +40,30 @@ const getHotRecommd = async () => {
 onLoad(() => {
   getHotRecommd()
 })
+
+const onScrolltolower = async () => {
+  console.log('滚动到底部了')
+  const activeSubTypeItem = subTypeItemList.value[activeIndex.value]
+  if (activeSubTypeItem.goodsItems.page >= activeSubTypeItem.goodsItems.pages) {
+    uni.showToast({
+      title: '没有更多数据了',
+      icon: 'none',
+    })
+    activeSubTypeItem.finish = true
+    return
+  }
+  activeSubTypeItem.goodsItems.page++
+  const url = currentHot!.url
+
+  const res = await getHotRecommdAPI(url, {
+    subType: activeSubTypeItem.id,
+    page: activeSubTypeItem.goodsItems.page,
+    pageSize: activeSubTypeItem.goodsItems.pageSize,
+  })
+
+  const getNewPageItemData = res.result.subTypes[activeIndex.value]
+  activeSubTypeItem.goodsItems.items.push(...getNewPageItemData.goodsItems.items)
+}
 </script>
 
 <template>
@@ -62,6 +90,7 @@ onLoad(() => {
       v-for="(item, index) in subTypeItemList"
       :key="item.id"
       v-show="index === activeIndex"
+      @scrolltolower="onScrolltolower"
     >
       <view class="goods">
         <navigator
@@ -79,7 +108,7 @@ onLoad(() => {
           </view>
         </navigator>
       </view>
-      <view class="loading-text">正在加载...</view>
+      <view class="loading-text">{{ item.finish ? '没有了' : '正在加载...' }}</view>
     </scroll-view>
   </view>
 </template>
