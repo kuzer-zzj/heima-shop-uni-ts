@@ -5,7 +5,7 @@ import type { BannerItem } from '@/types/home'
 import { onLoad } from '@dcloudio/uni-app'
 import { getCategoryTopAPI } from '@/services/category'
 import type { CategoryTopItem } from '@/types/category'
-
+import PageSkeleton from './components/PageSkeleton.vue'
 const bannerList = ref<BannerItem[]>([])
 const getBanner = async () => {
   const res = await getHomeBannerAPI()
@@ -31,14 +31,15 @@ const subCategory = computed(() => {
   return categoryList.value[activeIndex.value]?.children || []
 })
 
-onLoad(() => {
-  getBanner()
-  getCategory()
+const isLoading = ref(false)
+onLoad(async () => {
+  await Promise.all([getBanner(), getCategory()])
+  isLoading.value = true
 })
 </script>
 
 <template>
-  <view class="viewport">
+  <view class="viewport" v-if="isLoading">
     <!-- 搜索框 -->
     <view class="search">
       <view class="input">
@@ -89,6 +90,7 @@ onLoad(() => {
       </scroll-view>
     </view>
   </view>
+  <PageSkeleton v-else></PageSkeleton>
 </template>
 
 <style lang="scss">
