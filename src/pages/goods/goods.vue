@@ -4,6 +4,8 @@ import { ref } from 'vue'
 import { getGoodsByIdAPI } from '@/services/goods'
 import type { GoodsResult } from '@/types/goods'
 import { onLoad } from '@dcloudio/uni-app'
+import AddressPanel from './components/AddressPanel.vue'
+import ServicePanel from './components/ServicePanel.vue'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const goods = ref<GoodsResult>()
@@ -29,6 +31,16 @@ const onImgTap = (item: string) => {
     current: item,
     urls: goods.value!.mainPictures,
   })
+}
+
+const popup = ref<{
+  open: (type?: UniHelper.UniPopupType) => void
+  close: () => void
+}>()
+const popupName = ref<'addr' | 'service'>()
+const onOpenPopup = (type: 'addr' | 'service') => {
+  popupName.value = type
+  popup.value?.open()
 }
 </script>
 
@@ -66,11 +78,11 @@ const onImgTap = (item: string) => {
           <text class="label">选择</text>
           <text class="text ellipsis"> 请选择商品规格 </text>
         </view>
-        <view class="item arrow">
+        <view class="item arrow" @tap="onOpenPopup('addr')">
           <text class="label">送至</text>
           <text class="text ellipsis"> 请选择收获地址 </text>
         </view>
-        <view class="item arrow">
+        <view class="item arrow" @tap="onOpenPopup('service')">
           <text class="label">服务</text>
           <text class="text ellipsis"> 无忧退 快速退款 免费包邮 </text>
         </view>
@@ -140,6 +152,12 @@ const onImgTap = (item: string) => {
       <view class="buynow"> 立即购买 </view>
     </view>
   </view>
+
+  //弹出层
+  <uni-popup ref="popup" type="bottom">
+    <AddressPanel @close="popup?.close()" v-if="popupName === 'addr'"></AddressPanel>
+    <ServicePanel @close="popup?.close()" v-if="popupName === 'service'"></ServicePanel>
+  </uni-popup>
 </template>
 
 <style lang="scss">
