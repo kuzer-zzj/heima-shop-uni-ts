@@ -1,9 +1,9 @@
 <template name="skeleton">
   <view class="sk-container">
-    <scroll-view scroll-y="true" class="viewport viewport" enable-back-to-top="true">
+    <scroll-view :scroll-y="true" class="viewport viewport" :enable-back-to-top="true">
       <view class="goods goods">
         <view class="preview preview">
-          <swiper circular="true" current="0" autoplay="false">
+          <swiper :circular="true" :current="0" :autoplay="false">
             <swiper-item
               style="
                 position: absolute;

@@ -1,7 +1,7 @@
 // ServicePanel.vue
 <script setup lang="ts">
 const zidiaofu = defineEmits<{
-  (e: 'close'): void;
+  (e: 'close'): void
 }>()
 </script>
 
