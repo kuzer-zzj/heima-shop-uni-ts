@@ -104,15 +104,25 @@
 					"style": {
 						"navigationBarTitleText": "设置"
 					}
+				},
+        {
+					"path": "profile/profile",
+					"style": {
+            "navigationStyle": "custom", // 隐藏默认导航
+				    "navigationBarTextStyle": "white",
+						"navigationBarTitleText": "profile"
+					}
 				}
 			]
 		}
-	],
-  "preloadRule": {
-    "pages/my/my": {
-      "network": "all",
-      "packages": ["pagesMember"]
-    }
-  }
 
+	],
+	"preloadRule": {
+		"pages/my/my": {
+			"network": "all",
+			"packages": [
+				"pagesMember"
+			]
+		}
+	}
 }
