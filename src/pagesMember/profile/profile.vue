@@ -12,6 +12,38 @@ const getMemberProfile = async () => {
   profileInfo.value = res.result
 }
 onLoad(() => getMemberProfile())
+
+const onAvatarChange = () => {
+  // 实现上传头像的功能
+  uni.chooseMedia({
+    count: 1,
+    mediaType: ['image'],
+    success: (success) => {
+      console.log(success)
+      const { tempFilePath } = success.tempFiles[0]
+      // 实现上传逻辑
+      uni.uploadFile({
+        url: '/member/profile/avatar',
+        name: 'file',
+        filePath: tempFilePath,
+        success: (res) => {
+          if (res.statusCode === 200) {
+            profileInfo.value!.avatar = JSON.parse(res.data).result.avatar
+            uni.showToast({
+              title: '上传成功',
+              icon: 'success',
+            })
+          } else {
+            uni.showToast({
+              title: '网络异常',
+              icon: 'error',
+            })
+          }
+        },
+      })
+    },
+  })
+}
 </script>
 
 <template>
@@ -23,7 +55,7 @@ onLoad(() => getMemberProfile())
     </view>
     <!-- 头像 -->
     <view class="avatar">
-      <view class="avatar-content">
+      <view class="avatar-content" @tap="onAvatarChange">
         <image class="image" :src="profileInfo?.avatar" mode="aspectFill" />
         <text class="text">点击修改头像</text>
       </view>
