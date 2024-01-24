@@ -8,6 +8,7 @@ import CategoryPanel from './components/CategoryPanel.vue'
 import HotPanel from './components/HotPanel.vue'
 import type { XtxGuessInstance } from '@/types/component'
 import PageSkeleton from './components/PageSkeleton.vue'
+import { useGuessList } from '@/composables/useGuessList'
 
 const list = ref<BannerItem[]>([])
 const getHomeBanner = async () => {
@@ -30,13 +31,7 @@ const gethomeHotList = async () => {
   homeHotList.value = res.result
 }
 
-const guessRef = ref<XtxGuessInstance>()
-
-const onScrolltolower = () => {
-  console.log('滚动到底部了')
-  guessRef.value.getMore()
-  console.log('滚动到底部了over')
-}
+const { guessRef, onScrolltolower } = useGuessList()
 
 const isLoading = ref(false)
 
@@ -49,12 +44,12 @@ const isRefreshing = ref(false)
 const onRefresherrefresh = async () => {
   console.log('下拉刷新')
   isRefreshing.value = true
-  guessRef.value.resetParam()
+  guessRef.value!.resetParam()
   await Promise.all([
     getHomeBanner(),
     getcateGoryList(),
     gethomeHotList(),
-    guessRef.value.getMore(),
+    guessRef.value!.getMore(),
   ])
   isRefreshing.value = false
 }
