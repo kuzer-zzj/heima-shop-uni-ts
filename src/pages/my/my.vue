@@ -31,7 +31,7 @@ const { guessRef, onScrolltolower } = useGuessList()
         </navigator>
         <view class="meta">
           <view class="nickname">
-            {{ memberStore.profile.account || memberStore.profile.nickname }}
+            {{ memberStore.profile.nickname || memberStore.profile.account }}
           </view>
           <navigator class="extra" url="/pagesMember/profile/profile" hover-class="none">
             <text class="update">更新头像昵称</text>

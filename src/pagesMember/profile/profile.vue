@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { getMemberProfileAPI } from '@/services/member'
-import type { ProfileDetail } from '@/types/member'
+import { getMemberProfileAPI, putMemberProfileAPI } from '@/services/member'
+import { useMemberStore } from '@/stores'
+import type { Gender, ProfileDetail, ProfileParams } from '@/types/member'
 import { onLoad } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
-
-const profileInfo = ref<ProfileDetail>()
+const memeberStory = useMemberStore()
+const profileInfo = ref<ProfileDetail>({} as ProfileDetail)
 const getMemberProfile = async () => {
   const res = await getMemberProfileAPI()
   profileInfo.value = res.result
@@ -29,6 +30,7 @@ const onAvatarChange = () => {
         success: (res) => {
           if (res.statusCode === 200) {
             profileInfo.value!.avatar = JSON.parse(res.data).result.avatar
+            memeberStory.profile!.avatar = profileInfo.value.avatar
             uni.showToast({
               title: '上传成功',
               icon: 'success',
@@ -43,6 +45,45 @@ const onAvatarChange = () => {
       })
     },
   })
+}
+const onGenderChange: UniHelper.RadioGroupOnChange = (event) => {
+  profileInfo.value!.gender = event.detail.value as Gender
+}
+const onBirthdayChange: UniHelper.DatePickerOnChange = (event) => {
+  profileInfo.value!.birthday = event.detail.value
+}
+
+let cityCode: [string, string, string] = ['', '', '']
+const onCityChange: UniHelper.RegionPickerOnChange = (event) => {
+  profileInfo.value!.fullLocation = event.detail.value.join(' ')
+  cityCode = event.detail.code!
+}
+
+const onSubmit = async () => {
+  const { nickname, gender, birthday, profession } = profileInfo.value
+  const reqData = {
+    nickname,
+    gender,
+    birthday,
+    profession,
+  } as ProfileParams
+  if (cityCode[0]) {
+    reqData.provinceCode = cityCode[0]
+    reqData.cityCode = cityCode[1]
+    /** 区/县编码 */
+    reqData.countyCode = cityCode[2]
+  }
+  const res = await putMemberProfileAPI(reqData)
+  console.log('修改结果：', res)
+  memeberStory.profile!.nickname = res.result.nickname
+
+  uni.showToast({
+    title: '修改成功',
+    icon: 'success',
+  })
+  setTimeout(() => {
+    uni.navigateBack()
+  }, 400)
 }
 </script>
 
@@ -74,12 +115,12 @@ const onAvatarChange = () => {
             class="input"
             type="text"
             placeholder="请填写昵称"
-            :value="profileInfo?.nickname"
+            v-model="profileInfo!.nickname"
           />
         </view>
         <view class="form-item">
           <text class="label">性别</text>
-          <radio-group>
+          <radio-group @change="onGenderChange">
             <label class="radio">
               <radio value="男" color="#27ba9b" :checked="profileInfo?.gender === '男'" />
               男
@@ -93,6 +134,7 @@ const onAvatarChange = () => {
         <view class="form-item">
           <text class="label">生日</text>
           <picker
+            @change="onBirthdayChange"
             class="picker"
             mode="date"
             start="1900-01-01"
@@ -105,7 +147,12 @@ const onAvatarChange = () => {
         </view>
         <view class="form-item">
           <text class="label">城市</text>
-          <picker class="picker" mode="region" :value="profileInfo?.fullLocation?.split(' ')">
+          <picker
+            @change="onCityChange"
+            class="picker"
+            mode="region"
+            :value="profileInfo?.fullLocation?.split(' ')"
+          >
             <view v-if="profileInfo?.fullLocation">{{ profileInfo.fullLocation }}</view>
             <view class="placeholder" v-else>请选择城市</view>
           </picker>
@@ -116,12 +163,12 @@ const onAvatarChange = () => {
             class="input"
             type="text"
             placeholder="请填写职业"
-            :value="profileInfo?.profession"
+            v-model="profileInfo.profession"
           />
         </view>
       </view>
       <!-- 提交按钮 -->
-      <button class="form-button">保 存</button>
+      <button class="form-button" @tap="onSubmit">保 存</button>
     </view>
   </view>
 </template>
