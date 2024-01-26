@@ -7,10 +7,12 @@ import { onLoad } from '@dcloudio/uni-app'
 import AddressPanel from './components/AddressPanel.vue'
 import ServicePanel from './components/ServicePanel.vue'
 import PageSkeleton from './components/PageSkeleton.vue'
+import type { SkuPopupLocaldata } from '@/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const goods = ref<GoodsResult>()
-
+const localdata = ref<SkuPopupLocaldata>()
+const isShowSku = ref(false)
 const query = defineProps<{
   id: string
 }>()
@@ -18,6 +20,22 @@ const query = defineProps<{
 const getGoodsById = async () => {
   const res = await getGoodsByIdAPI(query.id)
   goods.value = res.result
+  // SKU组件所需格式
+  localdata.value = {
+    _id: res.result.id,
+    name: res.result.name,
+    goods_thumb: res.result.mainPictures[0],
+    spec_list: res.result.specs.map((v) => ({ name: v.name, list: v.values })),
+    sku_list: res.result.skus.map((v) => ({
+      _id: v.id,
+      goods_id: res.result.id,
+      goods_name: res.result.name,
+      image: v.picture,
+      price: v.price * 100, // 注意：需要乘以 100
+      stock: v.inventory,
+      sku_name_arr: v.specs.map((vv) => vv.valueName),
+    })),
+  }
 }
 
 const isLoading = ref(false)
@@ -80,7 +98,7 @@ const onOpenPopup = (type: 'addr' | 'service') => {
 
         <!-- 操作面板 -->
         <view class="action">
-          <view class="item arrow">
+          <view class="item arrow" @tap="() => (isShowSku = true)">
             <text class="label">选择</text>
             <text class="text ellipsis"> 请选择商品规格 </text>
           </view>
@@ -164,6 +182,8 @@ const onOpenPopup = (type: 'addr' | 'service') => {
       <AddressPanel @close="popup?.close()" v-if="popupName === 'addr'"></AddressPanel>
       <ServicePanel @close="popup?.close()" v-if="popupName === 'service'"></ServicePanel>
     </uni-popup>
+    <!-- SKU弹窗组件 -->
+    <vk-data-goods-sku-popup v-model="isShowSku" :localdata="localdata" />
   </template>
 
   <PageSkeleton v-else></PageSkeleton>
