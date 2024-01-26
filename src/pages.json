@@ -54,7 +54,8 @@
 			"style": {
 				"navigationBarTitleText": "商品详情"
 			}
-		}
+		},
+
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
@@ -105,17 +106,28 @@
 						"navigationBarTitleText": "设置"
 					}
 				},
-        {
+				{
 					"path": "profile/profile",
 					"style": {
-            "navigationStyle": "custom", // 隐藏默认导航
-				    "navigationBarTextStyle": "white",
+						"navigationStyle": "custom", // 隐藏默认导航
+						"navigationBarTextStyle": "white",
 						"navigationBarTitleText": "profile"
 					}
-				}
+				},
+				{
+					"path": "address/address",
+					"style": {
+						"navigationBarTitleText": "地址管理"
+					}
+				},
+        {
+          "path": "address-form/address-form",
+          "style": {
+            "navigationBarTitleText": ""
+          }
+        }
 			]
 		}
-
 	],
 	"preloadRule": {
 		"pages/my/my": {
