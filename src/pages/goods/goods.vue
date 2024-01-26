@@ -38,6 +38,17 @@ const getGoodsById = async () => {
   }
 }
 
+enum SkuMode {
+  Both = 1,
+  Cart = 2,
+  Buy = 3,
+}
+const mode = ref<SkuMode>(SkuMode.Both)
+const openSkuPopup = (modeType: SkuMode) => {
+  mode.value = modeType
+  isShowSku.value = true
+}
+
 const isLoading = ref(false)
 
 onLoad(async () => {
@@ -98,7 +109,7 @@ const onOpenPopup = (type: 'addr' | 'service') => {
 
         <!-- 操作面板 -->
         <view class="action">
-          <view class="item arrow" @tap="() => (isShowSku = true)">
+          <view class="item arrow" @tap="openSkuPopup(SkuMode.Both)">
             <text class="label">选择</text>
             <text class="text ellipsis"> 请选择商品规格 </text>
           </view>
@@ -172,8 +183,8 @@ const onOpenPopup = (type: 'addr' | 'service') => {
         </navigator>
       </view>
       <view class="buttons">
-        <view class="addcart"> 加入购物车 </view>
-        <view class="buynow"> 立即购买 </view>
+        <view class="addcart" @tap="openSkuPopup(SkuMode.Cart)"> 加入购物车 </view>
+        <view class="buynow" @tap="openSkuPopup(SkuMode.Buy)"> 立即购买 </view>
       </view>
     </view>
 
@@ -183,7 +194,13 @@ const onOpenPopup = (type: 'addr' | 'service') => {
       <ServicePanel @close="popup?.close()" v-if="popupName === 'service'"></ServicePanel>
     </uni-popup>
     <!-- SKU弹窗组件 -->
-    <vk-data-goods-sku-popup v-model="isShowSku" :localdata="localdata" />
+    <vk-data-goods-sku-popup
+      v-model="isShowSku"
+      :localdata="localdata"
+      :mode="mode"
+      add-cart-background-color="#FFA868"
+      buy-now-background-color="#27BA9B"
+    />
   </template>
 
   <PageSkeleton v-else></PageSkeleton>
