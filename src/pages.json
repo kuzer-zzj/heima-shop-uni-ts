@@ -60,8 +60,7 @@
 			"style": {
 				"navigationBarTitleText": "商品详情"
 			}
-		},
-
+		}
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
@@ -126,12 +125,23 @@
 						"navigationBarTitleText": "地址管理"
 					}
 				},
-        {
-          "path": "address-form/address-form",
-          "style": {
-            "navigationBarTitleText": ""
-          }
-        }
+				{
+					"path": "address-form/address-form",
+					"style": {
+						"navigationBarTitleText": ""
+					}
+				}
+			]
+		},
+		{
+			"root": "pagesOrder",
+			"pages": [
+				{
+					"path": "creat/creat",
+					"style": {
+						"navigationBarTitleText": "订单"
+					}
+				}
 			]
 		}
 	],

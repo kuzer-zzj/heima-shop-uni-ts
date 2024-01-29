@@ -69,7 +69,8 @@ const onPayment = () => {
       icon: 'none',
     })
   }
-  uni.showToast({ title: '待处理' })
+  uni.navigateTo({ url: '/pagesOrder/creat/creat' })
+  //uni.showToast({ title: '待处理' })
 }
 </script>
 
