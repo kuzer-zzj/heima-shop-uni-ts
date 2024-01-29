@@ -1,9 +1,15 @@
 <script setup lang="ts">
 import type { InputNumberBoxEvent } from '@/components/vk-data-input-number-box/vk-data-input-number-box'
-import { deleteMemberCartAPI, getMemberCartAPI, putMemberCartBySkuIdAPI } from '@/services/cart'
+import {
+  deleteMemberCartAPI,
+  getMemberCartAPI,
+  putMemberCartBySkuIdAPI,
+  putMemberCartSelectedAPI,
+} from '@/services/cart'
 import { useMemberStore } from '@/stores'
 import type { CartItem } from '@/types/cart'
 import { onShow } from '@dcloudio/uni-app'
+import { computed } from 'vue'
 import { ref } from 'vue'
 
 const menberStory = useMemberStore()
@@ -35,6 +41,36 @@ const onNumberChange = (ev: InputNumberBoxEvent) => {
   console.log(ev)
   putMemberCartBySkuIdAPI(ev.index, { count: ev.value })
 }
+const onSelect = (item: CartItem) => {
+  item.selected = !item.selected
+  putMemberCartBySkuIdAPI(item.skuId, { selected: item.selected })
+}
+const isAllSelect = computed(() => {
+  return cartList.value?.length && cartList.value?.every((item) => item.selected)
+})
+const onAllSelectChange = () => {
+  const _isAllSelect = !isAllSelect.value
+  cartList.value?.forEach((item) => {
+    item.selected = _isAllSelect
+  })
+  putMemberCartSelectedAPI({ selected: _isAllSelect })
+}
+
+const selectedCartList = computed(() => cartList.value?.filter((v) => v.selected))
+const selectedCartCount = computed(() => selectedCartList.value?.reduce((s, i) => s + i.count, 0))
+const selectedCartPrice = computed(() =>
+  selectedCartList.value?.reduce((s, i) => s + i.nowPrice * i.count, 0),
+)
+
+const onPayment = () => {
+  if (selectedCartCount.value === 0) {
+    return uni.showToast({
+      title: '请选择商品',
+      icon: 'none',
+    })
+  }
+  uni.showToast({ title: '待处理' })
+}
 </script>
 
 <template>
@@ -55,7 +91,11 @@ const onNumberChange = (ev: InputNumberBoxEvent) => {
             <!-- 商品信息 -->
             <view class="goods">
               <!-- 选中状态 -->
-              <text class="checkbox" :class="{ checked: item.selected }"></text>
+              <text
+                class="checkbox"
+                :class="{ checked: item.selected }"
+                @tap="onSelect(item)"
+              ></text>
               <navigator
                 :url="`/pages/goods/goods?id=${item.id}`"
                 hover-class="none"
@@ -98,11 +138,17 @@ const onNumberChange = (ev: InputNumberBoxEvent) => {
       </view>
       <!-- 吸底工具栏 -->
       <view class="toolbar">
-        <text class="all" :class="{ checked: true }">全选</text>
+        <text class="all" :class="{ checked: isAllSelect }" @tap="onAllSelectChange">全选</text>
         <text class="text">合计:</text>
-        <text class="amount">100</text>
+        <text class="amount">{{ selectedCartPrice }}</text>
         <view class="button-grounp">
-          <view class="button payment-button" :class="{ disabled: true }"> 去结算(10) </view>
+          <view
+            @tap="onPayment"
+            class="button payment-button"
+            :class="{ disabled: selectedCartCount === 0 }"
+          >
+            去结算({{ selectedCartCount }})
+          </view>
         </view>
       </view>
     </template>
