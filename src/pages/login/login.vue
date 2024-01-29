@@ -32,6 +32,7 @@ const loginSuccess = (loginData: LoginResult) => {
   memberStore.setProfile(loginData)
   setTimeout(() => {
     uni.switchTab({ url: '/pages/my/my' })
+    //uni.navigateBack()
   }, 500)
 }
 </script>
