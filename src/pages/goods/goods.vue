@@ -194,7 +194,7 @@ const onOpenPopup = (type: 'addr' | 'service') => {
         <button class="icons-button" open-type="contact">
           <text class="icon-handset"></text>客服
         </button>
-        <navigator class="icons-button" url="/pages/cart/cart" open-type="switchTab">
+        <navigator class="icons-button" url="/pages/cart/cart2" open-type="navigate">
           <text class="icon-cart"></text>购物车
         </navigator>
       </view>
