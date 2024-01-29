@@ -8,10 +8,12 @@ import AddressPanel from './components/AddressPanel.vue'
 import ServicePanel from './components/ServicePanel.vue'
 import PageSkeleton from './components/PageSkeleton.vue'
 import type {
+  SkuPopupEvent,
   SkuPopupInstance,
   SkuPopupLocaldata,
 } from '@/components/vk-data-goods-sku-popup/vk-data-goods-sku-popup'
 import { computed } from 'vue'
+import { postMemberCartAPI } from '@/services/cart'
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 const goods = ref<GoodsResult>()
@@ -57,6 +59,11 @@ const skuPopupRef = ref<SkuPopupInstance>()
 const selectArr = computed(() => {
   return skuPopupRef.value?.selectArr?.join(' ').trim() || '请选择商品规格'
 })
+
+const onAddCart = (ev: SkuPopupEvent) => {
+  postMemberCartAPI({ skuId: ev._id, count: ev.buy_num })
+  isShowSku.value = false
+}
 
 const isLoading = ref(false)
 
@@ -210,7 +217,7 @@ const onOpenPopup = (type: 'addr' | 'service') => {
       add-cart-background-color="#FFA868"
       buy-now-background-color="#27BA9B"
       ref="skuPopupRef"
-      
+      @add-cart="onAddCart"
       :actived-style="{
         color: '#27BA9B',
         borderColor: '#27BA9B',
