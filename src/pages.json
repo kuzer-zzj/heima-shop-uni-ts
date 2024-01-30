@@ -148,6 +148,12 @@
             "navigationStyle": "custom", // 隐藏默认导航
 						"navigationBarTitleText": ""
 					}
+				},
+        {
+					"path": "payment/payment",
+					"style": {
+						"navigationBarTitleText": "支付"
+					}
 				}
 			]
 		}

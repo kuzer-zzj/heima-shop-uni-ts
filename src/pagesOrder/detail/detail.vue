@@ -5,6 +5,7 @@ import type { OrderResult } from '@/types/order'
 import { onLoad, onReady } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import { OrderState, orderStateList } from '@/services/constants'
+import { getPayMockAPI, getPayWxPayMiniPayAPI } from '@/services/pay'
 
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
@@ -76,6 +77,16 @@ onLoad(() => getMemberOrderById())
 const onTimeUp = () => {
   order.value!.orderState = OrderState.YiQuXiao
 }
+
+const onPayment = async () => {
+  if (import.meta.env.DEV) {
+    await getPayMockAPI({ orderId: query.id })
+  } else {
+    const res = await getPayWxPayMiniPayAPI({ orderId: query.id })
+    await wx.requestPayment(res.result)
+  }
+  uni.redirectTo({ url: `/pagesOrder/payment/payment?id=${query.id}` })
+}
 </script>
 
 <template>
@@ -111,7 +122,7 @@ const onTimeUp = () => {
               @timeup="onTimeUp"
             />
           </view>
-          <view class="button">去支付</view>
+          <view class="button" @tap="onPayment">去支付</view>
         </template>
         <!-- 其他订单状态:展示再次购买按钮 -->
         <template v-else>
@@ -214,7 +225,7 @@ const onTimeUp = () => {
       <view class="toolbar" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
         <!-- 待付款状态:展示支付按钮 -->
         <template v-if="true">
-          <view class="button primary"> 去支付 </view>
+          <view class="button primary" @tap="onPayment"> 去支付 </view>
           <view class="button" @tap="popup?.open?.()"> 取消订单 </view>
         </template>
         <!-- 其他订单状态:按需展示按钮 -->
