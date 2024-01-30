@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { getMemberOrderPreAPI } from '@/services/order'
+import { getMemberOrderPreAPI, getMemberOrderPreNowAPI, postMemberOrderAPI } from '@/services/order'
 import type { OrderPreResult } from '@/types/order'
 import { onLoad } from '@dcloudio/uni-app'
 import { useAddressStore } from '@/stores/modules/address'
@@ -23,10 +23,21 @@ const activeDelivery = computed(() => deliveryList.value[activeIndex.value])
 const onChangeDelivery: UniHelper.SelectorPickerOnChange = (ev) => {
   activeIndex.value = ev.detail.value
 }
+
+const query = defineProps<{
+  skuId: string
+  count: string
+}>()
+
 const order = ref<OrderPreResult>()
 const getMemberOrderPre = async () => {
-  const res = await getMemberOrderPreAPI()
-  order.value = res.result
+  if (query.count && query.skuId) {
+    const res = await getMemberOrderPreNowAPI({ skuId: query.skuId, count: query.count })
+    order.value = res.result
+  } else {
+    const res = await getMemberOrderPreAPI()
+    order.value = res.result
+  }
 }
 onLoad(() => getMemberOrderPre())
 
@@ -34,6 +45,22 @@ const addressStore = useAddressStore()
 const selectAddress = computed(() => {
   return addressStore.address || order.value?.userAddresses.find((item) => item.isDefault === 1)
 })
+const onSubOrder = async () => {
+  if (!selectAddress.value) {
+    uni.showToast({ title: '请选择收货地址', icon: 'none' })
+    return
+  }
+  const res = await postMemberOrderAPI({
+    goods: order.value!.goods.map((item) => ({ skuId: item.skuId, count: item.count })),
+    addressId: selectAddress.value?.id,
+    buyerMessage: buyerMessage.value,
+    deliveryTimeType: activeDelivery.value.type,
+    payChannel: 2,
+    payType: 1,
+  })
+
+  uni.redirectTo({ url: `/pagesOrder/detail/detail?id=${res.result.id}` })
+}
 </script>
 
 <template>
@@ -118,7 +145,9 @@ const selectAddress = computed(() => {
     <view class="total-pay symbol">
       <text class="number">{{ order?.summary.totalPayPrice }}</text>
     </view>
-    <view class="button" :class="{ disabled: true }"> 提交订单 </view>
+    <view class="button" :class="{ disabled: !selectAddress?.id }" @tap="onSubOrder">
+      提交订单
+    </view>
   </view>
 </template>
 

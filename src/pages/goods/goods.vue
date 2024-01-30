@@ -92,6 +92,11 @@ const onOpenPopup = (type: 'addr' | 'service') => {
   popupName.value = type
   popup.value?.open()
 }
+const onBuyNow = (ev: SkuPopupEvent) => {
+  uni.navigateTo({
+    url: `/pagesOrder/creat/creat?skuId=${ev._id}&count=${ev.buy_num}`,
+  })
+}
 </script>
 
 <template>
@@ -217,6 +222,7 @@ const onOpenPopup = (type: 'addr' | 'service') => {
       add-cart-background-color="#FFA868"
       buy-now-background-color="#27BA9B"
       ref="skuPopupRef"
+      @buy-now="onBuyNow"
       @add-cart="onAddCart"
       :actived-style="{
         color: '#27BA9B',
