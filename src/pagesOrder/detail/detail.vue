@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { useGuessList } from '@/composables/useGuessList'
-import { getMemberOrderByIdAPI, getMemberOrderConsignmentByIdAPI } from '@/services/order'
-import type { OrderResult } from '@/types/order'
+import {
+  deleteMemberOrderAPI,
+  getMemberOrderByIdAPI,
+  getMemberOrderConsignmentByIdAPI,
+  getMemberOrderLogisticsByIdAPI,
+  putMemberOrderReceiptByIdAPI,
+} from '@/services/order'
+import type { OrderLogisticResult, OrderResult } from '@/types/order'
 import { onLoad, onReady } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import { OrderState, orderStateList } from '@/services/constants'
@@ -72,6 +78,13 @@ const order = ref<OrderResult>()
 const getMemberOrderById = async () => {
   const res = await getMemberOrderByIdAPI(query.id)
   order.value = res.result
+  if (
+    [OrderState.YiWanCheng, OrderState.DaiPingJia, OrderState.DaiShouHuo].includes(
+      order.value!.orderState,
+    )
+  ) {
+    getMemberOrderLogistics()
+  }
 }
 onLoad(() => getMemberOrderById())
 const onTimeUp = () => {
@@ -93,6 +106,39 @@ const onOrderConsignment = async () => {
   await getMemberOrderConsignmentByIdAPI(query.id)
   uni.showToast({ title: '发货成功' })
   getMemberOrderById()
+}
+
+const onOrderReceipt = async () => {
+  uni.showModal({
+    content: '确认收货？',
+    success: async (res) => {
+      if (res.confirm) {
+        const res = await putMemberOrderReceiptByIdAPI(query.id)
+        order.value = res.result
+      }
+    },
+  })
+}
+
+const logistics = ref<OrderLogisticResult>()
+const getMemberOrderLogistics = async () => {
+  const res = await getMemberOrderLogisticsByIdAPI(query.id)
+  logistics.value = res.result
+}
+
+const onDel = () => {
+  uni.showModal({
+    content: '确认删除？',
+    success: async (res) => {
+      if (res.confirm) {
+        await deleteMemberOrderAPI({ ids: [query.id] })
+        uni.showToast({ title: '删除成功' })
+        setTimeout(() => {
+          uni.redirectTo({ url: '/pagesOrder/list/list' })
+        }, 400)
+      }
+    },
+  })
 }
 </script>
 
@@ -157,11 +203,11 @@ const onOrderConsignment = async () => {
       <!-- 配送状态 -->
       <view class="shipment">
         <!-- 订单物流信息 -->
-        <view v-for="item in 1" :key="item" class="item">
+        <view v-for="item in logistics?.list" :key="item.id" class="item">
           <view class="message">
-            您已在广州市天河区黑马程序员完成取件，感谢使用菜鸟驿站，期待再次为您服务。
+            {{ item.text }}
           </view>
-          <view class="date"> 2023-04-14 13:14:20 </view>
+          <view class="date">{{ item.time }} </view>
         </view>
         <!-- 用户收货地址 -->
         <view class="locate">
@@ -197,7 +243,7 @@ const onOrderConsignment = async () => {
             </view>
           </navigator>
           <!-- 待评价状态:展示按钮 -->
-          <view class="action" v-if="true">
+          <view class="action" v-if="order.orderState === OrderState.DaiPingJia">
             <view class="button primary">申请售后</view>
             <navigator url="" class="button"> 去评价 </navigator>
           </view>
@@ -237,7 +283,7 @@ const onOrderConsignment = async () => {
       <view class="toolbar-height" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }"></view>
       <view class="toolbar" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
         <!-- 待付款状态:展示支付按钮 -->
-        <template v-if="true">
+        <template v-if="order.orderState === OrderState.DaiFuKuan">
           <view class="button primary" @tap="onPayment"> 去支付 </view>
           <view class="button" @tap="popup?.open?.()"> 取消订单 </view>
         </template>
@@ -251,11 +297,11 @@ const onOrderConsignment = async () => {
             再次购买
           </navigator>
           <!-- 待收货状态: 展示确认收货 -->
-          <view class="button primary"> 确认收货 </view>
+          <view class="button primary" @tap="onOrderReceipt"> 确认收货 </view>
           <!-- 待评价状态: 展示去评价 -->
           <view class="button"> 去评价 </view>
           <!-- 待评价/已完成/已取消 状态: 展示删除订单 -->
-          <view class="button delete"> 删除订单 </view>
+          <view class="button delete" @tap="onDel"> 删除订单 </view>
         </template>
       </view>
     </template>

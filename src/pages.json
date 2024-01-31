@@ -142,21 +142,28 @@
 						"navigationBarTitleText": "订单"
 					}
 				},
-        {
+				{
 					"path": "detail/detail",
 					"style": {
-            "navigationStyle": "custom", // 隐藏默认导航
+						"navigationStyle": "custom", // 隐藏默认导航
 						"navigationBarTitleText": ""
 					}
 				},
-        {
+				{
 					"path": "payment/payment",
 					"style": {
 						"navigationBarTitleText": "支付"
 					}
+				},
+        {
+					"path": "list/list",
+					"style": {
+						"navigationBarTitleText": "订单列表"
+					}
 				}
 			]
 		}
+
 	],
 	"preloadRule": {
 		"pages/my/my": {
