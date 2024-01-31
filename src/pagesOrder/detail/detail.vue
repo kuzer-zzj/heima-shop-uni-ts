@@ -134,7 +134,7 @@ const onOrderConsignment = async () => {
         <!-- 其他订单状态:展示再次购买按钮 -->
         <template v-else>
           <!-- 订单状态文字 -->
-          <view class="status"> {{ orderStateList[order?.orderState] }} </view>
+          <view class="status"> {{ orderStateList[order?.orderState].text }} </view>
           <view class="button-group">
             <navigator
               class="button"
