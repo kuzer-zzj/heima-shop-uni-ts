@@ -56,6 +56,12 @@
     },
     "usingComponents": true
   },
+  /*网页端特有 "h5": {
+    "router": {
+      "base": "./"
+    }
+  },*/
+
   "mp-alipay": {
     "usingComponents": true
   },

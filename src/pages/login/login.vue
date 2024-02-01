@@ -51,10 +51,13 @@ const loginSuccess = (loginData: LoginResult) => {
       <!-- <button class="button phone">登录</button> -->
 
       <!-- 小程序端授权登录 -->
+      <!-- #ifdef MP-WEIXIN -->
       <button class="button phone" open-type="getPhoneNumber" @getphonenumber="onGetphonenumber">
         <text class="icon icon-phone"></text>
         手机号快捷登录
       </button>
+      <!-- #endif -->
+
       <view class="extra">
         <view class="caption">
           <text>其他登录方式</text>
